@@ -54,6 +54,7 @@
 		EA9901161E21A1D90056FEBD /* devicesupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = devicesupport.m; sourceTree = "<group>"; };
 		EA9901181E21A2180056FEBD /* IOKit.tbd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.text-based-dylib-definition"; path = IOKit.tbd; sourceTree = "<group>"; };
 		EAA7F7C61E3EE4AF00BE3C64 /* dropbear.plist */ = {isa = PBXFileReference; explicitFileType = file.bplist; path = dropbear.plist; sourceTree = "<group>"; };
+		F555656F1E4ADBDD00BEF582 /* jailbreak.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = jailbreak.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +94,7 @@
 				EA1A3B9B1E38BBDB009CA025 /* patchfinder64.h */,
 				EA9901021E219C210056FEBD /* offsets.c */,
 				EA9901031E219C210056FEBD /* offsets.h */,
+				F555656F1E4ADBDD00BEF582 /* jailbreak.h */,
 				EA99010D1E21A1560056FEBD /* jailbreak.m */,
 				EA9900E91E1E9F060056FEBD /* AppDelegate.h */,
 				EA1A3BA61E398E33009CA025 /* 0.reload.plist */,

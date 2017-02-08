@@ -1,5 +1,11 @@
 #!/bin/sh
-ls /etc/rc.d | while read a; do /etc/rc.d/$a; done
+
+if [[ "k$NO_SUBSTRATE_THANKS" == "kok" ]]; then
+    ls /etc/rc.d | grep -v "substrate" | while read a; do /etc/rc.d/$a; done
+else
+    ls /etc/rc.d | while read a; do /etc/rc.d/$a; done
+fi
+
 sleep 1
 launchctl unload $(ls /System/Library/LaunchDaemons/ | grep -v logd | grep -v fud | grep -v ReportCrash | while read a; do printf /System/Library/LaunchDaemons/$a\ ; done)
 launchctl unload /System/Library/NanoLaunchDaemons

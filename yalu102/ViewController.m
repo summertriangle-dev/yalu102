@@ -6,6 +6,7 @@
 //  Copyright © 2017 kimjongcracks. All rights reserved.
 //
 
+#import "jailbreak.h"
 #import "offsets.h"
 #import "ViewController.h"
 #import <mach-o/loader.h>
@@ -25,7 +26,9 @@ typedef struct {
 } sprz;
 
 @interface ViewController ()
-
+@property (retain, nonatomic) IBOutlet UIView *options;
+@property (retain, nonatomic) IBOutlet UISwitch *dropbearOpenSwitch;
+@property (retain, nonatomic) IBOutlet UISwitch *bootstrapAnywaySwitch;
 @end
 
 @implementation ViewController
@@ -35,14 +38,52 @@ typedef struct {
     init_offsets();
     struct utsname u = { 0 };
     uname(&u);
-    
+
+    [self readConfig];
+    [self setNeedsStatusBarAppearanceUpdate];
 
     if (strstr(u.version, "MarijuanARM")) {
         [dope setEnabled:NO];
         [dope setTitle:@"already jailbroken" forState:UIControlStateDisabled];
+        //self.options.alpha = 0.3;
+
+        for (UISwitch *mightnotactuallybeaswitch in self.options.subviews) {
+            if ([mightnotactuallybeaswitch isKindOfClass:[UISwitch class]]) {
+                mightnotactuallybeaswitch.enabled = NO;
+            }
+        }
     }
 
     // Do any additional setup after loading the view, typically from a nib.
+}
+
+- (UIStatusBarStyle)preferredStatusBarStyle {
+    return UIStatusBarStyleLightContent;
+}
+
+- (IBAction)switchActivate:(UISwitch *)sender {
+    switch (sender.tag) {
+        case 1:
+            [[NSUserDefaults standardUserDefaults] setBool:sender.on forKey:@"y_dropbear_open"];
+            opt_dropbear_open = sender.on;
+            break;
+        case 2:
+            opt_disable_substrate = !sender.on;
+            break;
+        case 3:
+            opt_bootstrap_anyway = sender.on;
+            break;
+        default:
+            NSLog(@"shit");
+    }
+
+    NSLog(@"dropbear_open: %d \ndisable_substrate: %d \nbootstrap_anyway: %d", opt_dropbear_open, opt_disable_substrate, opt_bootstrap_anyway);
+}
+
+- (void)readConfig {
+    opt_dropbear_open = self.dropbearOpenSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:@"y_dropbear_open"];
+    opt_disable_substrate = NO;
+    opt_bootstrap_anyway = self.bootstrapAnywaySwitch.on = NO;
 }
 
 typedef natural_t not_natural_t;
@@ -384,4 +425,10 @@ gotclock:;
 }
 
 
+- (void)dealloc {
+    [_options release];
+    [_dropbearOpenSwitch release];
+    [_bootstrapAnywaySwitch release];
+    [super dealloc];
+}
 @end

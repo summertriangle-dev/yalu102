@@ -11,7 +11,11 @@
 #import <mach/mach.h>
 #import "devicesupport.h"
 
+#ifndef USING_STOLEN_IOKITLIB_DECLARATIONS
 #import <IOKit/IOKitLib.h>
+#else
+#endif
+
 #import <dlfcn.h>
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
@@ -28,6 +32,10 @@
 #import <sys/utsname.h>
 
 #import "patchfinder64.h"
+
+int opt_dropbear_open = 0;
+int opt_disable_substrate = 0;
+int opt_bootstrap_anyway = 0;
 
 #define vm_address_t mach_vm_address_t
 
@@ -851,7 +859,7 @@ remappage[remapcnt++] = (x & (~PMK));\
             
             int f = open("/.installed_yaluX", O_RDONLY);
             
-            if (f == -1) {
+            if (f == -1 || opt_bootstrap_anyway) {
                 NSString* tar = [execpath stringByAppendingPathComponent:@"tar"];
                 NSString* bootstrap = [execpath stringByAppendingPathComponent:@"bootstrap.tar"];
                 const char* jl = [tar UTF8String];
@@ -905,17 +913,32 @@ remappage[remapcnt++] = (x & (~PMK));\
             }
             {
                 NSString* jlaunchctl = [execpath stringByAppendingPathComponent:@"0.reload.plist"];
-                char* jl = [jlaunchctl UTF8String];
+                NSData *da_reload_job = [[NSData alloc] initWithContentsOfFile:jlaunchctl];
+                NSMutableDictionary *mut_reload_job = [NSPropertyListSerialization propertyListWithData:da_reload_job options:NSPropertyListMutableContainers format:NULL error:NULL];
+                [da_reload_job release];
+
+                if (opt_disable_substrate) {
+                    mut_reload_job[@"EnvironmentVariables"] = @{@"NO_SUBSTRATE_THANKS": @"ok"};
+                }
+
                 unlink("/Library/LaunchDaemons/0.reload.plist");
-                copyfile(jl, "/Library/LaunchDaemons/0.reload.plist", 0, COPYFILE_ALL);
+                [mut_reload_job writeToFile:@"/Library/LaunchDaemons/0.reload.plist" atomically:NO];
                 chmod("/Library/LaunchDaemons/0.reload.plist", 0644);
                 chown("/Library/LaunchDaemons/0.reload.plist", 0, 0);
             }
             {
                 NSString* jlaunchctl = [execpath stringByAppendingPathComponent:@"dropbear.plist"];
-                char* jl = [jlaunchctl UTF8String];
+                NSData *da_ssh_job = [[NSData alloc] initWithContentsOfFile:jlaunchctl];
+                NSMutableDictionary *mut_ssh_job = [NSPropertyListSerialization propertyListWithData:da_ssh_job options:NSPropertyListMutableContainers format:NULL error:NULL];
+                [da_ssh_job release];
+
+                if (opt_dropbear_open) {
+                    [mut_ssh_job[@"ProgramArguments"] removeLastObject];
+                    [mut_ssh_job[@"ProgramArguments"] addObject:@"0.0.0.0:22"];
+                }
+
                 unlink("/Library/LaunchDaemons/dropbear.plist");
-                copyfile(jl, "/Library/LaunchDaemons/dropbear.plist", 0, COPYFILE_ALL);
+                [mut_ssh_job writeToFile:@"/Library/LaunchDaemons/dropbear.plist" atomically:NO];
                 chmod("/Library/LaunchDaemons/dropbear.plist", 0644);
                 chown("/Library/LaunchDaemons/dropbear.plist", 0, 0);
             }
